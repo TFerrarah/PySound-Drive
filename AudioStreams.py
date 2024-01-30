@@ -15,14 +15,19 @@ class AudioStreams():
     def __init__(self, components) -> None:
         # Start audio streams
         self.streams = []
+        self.streams_ports = {}
         port = INITIAL_ZMQ_PORT
 
         for c in components:
             filename = os.path.splitext(os.path.basename(c))[0]
-            print(str(port) +" -> "+ filename)
+            print(filename +" -> "+ str(port))
             self.streams.append(subprocess.Popen(create_audio_cmd(c, port), shell=True))
+            self.streams_ports[filename] = port
             port = port+1
     
+    def get_streams_ports(self):
+        return self.streams_ports
+
     def change_lpf(self, frequency, port):
         cmd_lpf = "echo lowpass@lpf frequency "+str(frequency)+" | zmqsend -b tcp://localhost:"+str(port)
         subprocess.run(cmd_lpf, shell=True)
