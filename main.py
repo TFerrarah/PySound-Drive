@@ -59,6 +59,8 @@ try:
         loop.change_vol(vocals_freq, vocals_port)
         print(volumes)
 
+        print("volumes ↑ | Frequencies ↓")
+
         # Set LPF frequency
         loop.change_lpf(bass_freq, bass_port)
         loop.change_lpf(drums_freq, drums_port)
