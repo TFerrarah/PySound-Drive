@@ -34,13 +34,13 @@ class AudioStreams():
         cmd_lpf = "echo lowpass@lpf frequency "+str(frequency)+" | zmqsend -b tcp://127.0.0.1:"+str(port)
         if (platform.system() == "Windows"):
             cmd_lpf = ""
-        subprocess.run(cmd_lpf, shell=True)
+        subprocess.run(cmd_lpf, shell=True, stdout = subprocess.DEVNULL)
     
     def change_vol(self, volume ,port):
         cmd_vol = "echo volume@vol volume "+str(volume)+" | zmqsend -b tcp://127.0.0.1:"+str(port)
         if (platform.system() == "Windows"):
             cmd_vol = ""
-        subprocess.run(cmd_vol, shell=True)
+        subprocess.run(cmd_vol, shell=True, stdout = subprocess.DEVNULL)
 
     def stop_streams(self):
         for s in self.streams:
