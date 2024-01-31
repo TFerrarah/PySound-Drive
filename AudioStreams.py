@@ -1,4 +1,5 @@
 import os
+import platform
 import time
 import subprocess
 
@@ -29,8 +30,12 @@ class AudioStreams():
         return self.streams_ports
 
     def change_lpf(self, frequency, port):
-        cmd_lpf = "echo lowpass@lpf frequency "+str(frequency)+" | zmqsend -b tcp://localhost:"+str(port)
+        print("Changing lpf for port "+str(port))
+        cmd_lpf = "echo lowpass@lpf frequency "+str(frequency)+" | zmqsend -b tcp://127.0.0.1:"+str(port)
+        if (platform.system() == "Windows"):
+            cmd_lpf = "echo ain't no way youre changing anything buddy."
         subprocess.run(cmd_lpf, shell=True)
+        print("LPF Changed succesfully for port "+str(port))
 
     def stop_streams(self):
         for s in self.streams:
