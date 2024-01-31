@@ -7,8 +7,24 @@ MAX_SPEED = 150
 
 class OBDHandler():
     def __init__(self):
+
+        ports = obd.scan_serial()      # return list of valid USB or RF ports
+        print(ports)
+        
+        # Choose OBDII port
+        while True:
+            try:
+                self.obd_port = int(input("Please choose your port [0-"+str(len(ports)-1)+"]"))
+                if 0 <= self.obd_port <= int(len(ports)):
+                    break
+                else:
+                    print("Port number is not valid. Please try again")
+            except ValueError:
+                print("Input not recognized. Try again")
+
+
         # Create connection
-        self.connection = obd.OBD("/dev/tty.OBDII", baudrate=9600, protocol="7", fast=False) # auto-connects to USB or RF port
+        self.connection = obd.OBD(ports[self.obd_port], baudrate=9600, protocol="7", fast=False) # auto-connects to USB or RF port
 
         # Set max RPM
         while True:
