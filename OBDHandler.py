@@ -71,10 +71,24 @@ class OBDHandler():
         return -31005.6*percentage**2+51178*percentage-41.8572 # Formula calculated using https://www.dcode.fr/function-equation-finder
     
     def rpm_to_freq(self, percentage):
-        return -24218.2*percentage**2+47094.5*percentage+200 # Formula calculated using https://www.dcode.fr/function-equation-finder
+        return 68241*percentage-13525.3 # Formula calculated using https://www.dcode.fr/function-equation-finder
     
     def speed_to_freq(self, percentage):
         return 1874.42*math.log(2079.27*percentage+0.0331104)+6587.76 # Formula calculated using https://www.dcode.fr/function-equation-finder
+    
+    def speed_to_vol(self, percentage):
+        r = 5.49451*percentage**2+3.9011*percentage
+        if r > 1 : r=1
+        return r
+
+    def rpm_to_vol(self, percentage):
+        r = 0.000260417*math.e**{27.7259*percentage}-0.0666667
+        if r < 0 : r = 0
+        return r
+    
+    def pedal_to_vol(self, percentage):
+        return percentage
+
     
     def normalize_value(self, curr, max_value):
         curr = max(0, curr)
@@ -100,4 +114,12 @@ class OBDHandler():
             "speed": self.speed_to_freq(self.normalize_value(self.speed, MAX_SPEED)),
             "rpm": self.rpm_to_freq(self.normalize_value(self.rpm, self.max_rpm)),
             "pedal": self.pedal_to_freq(self.pedal)
+        }
+    
+    def get_volumes(self):
+        self.refresh_values() # Auto refresh values
+        return {
+            "speed": self.speed_to_vol(self.normalize_value(self.speed, MAX_SPEED)),
+            "rpm": self.rpm_to_vol(self.normalize_value(self.rpm, self.max_rpm)),
+            "pedal": self.pedal_to_vol(self.pedal) # This won't really get used
         }

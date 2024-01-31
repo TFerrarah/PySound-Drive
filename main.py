@@ -36,7 +36,7 @@ try:
         time.sleep(0.05) # The less this value, the more accurate and responsive the audio change will be.
 
         frequencies = handler.get_frequencies()
-        print(handler.get_pedal())
+        volumes = handler.get_volumes()
 
         # calculate lpf frequency
 
@@ -45,13 +45,26 @@ try:
         other_freq = average([frequencies["pedal"], frequencies["rpm"], frequencies["speed"]], weights=[.2, .2, 1])
         vocals_freq = average([frequencies["speed"]], weights=[1])
 
-        print(vocals_freq)
+        # Calculate volumes
+
+        bass_vol = average([volumes["pedal"], volumes["rpm"]], weights=[.5, 1])
+        other_vol = average([volumes["pedal"], volumes["rpm"], volumes["speed"]], weights=[.2, 1, .2])
+        drums_freq = average([volumes["speed"]], weights=[1])
+        vocals_freq = average([volumes["speed"]], weights=[1])
+
+        # Set Volumes
+        loop.change_vol(bass_freq, bass_port)
+        loop.change_vol(drums_freq, drums_port)
+        loop.change_vol(other_freq, other_port)
+        loop.change_vol(vocals_freq, vocals_port)
+        print(volumes)
 
         # Set LPF frequency
         loop.change_lpf(bass_freq, bass_port)
         loop.change_lpf(drums_freq, drums_port)
         loop.change_lpf(other_freq, other_port)
-        loop.change_lpf(10, vocals_port)
+        loop.change_lpf(vocals_freq, vocals_port)
+        print(frequencies)
         
 
 except KeyboardInterrupt:

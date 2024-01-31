@@ -7,9 +7,10 @@ import subprocess
 
 STARTING_LPF = 200
 INITIAL_ZMQ_PORT = 5560
+STARTING_VOLUME = 0
 
 def create_audio_cmd(audio, port):
-    return "ffplay -ss 14 -hide_banner -loglevel error -nodisp -loop 0 -af 'lowpass@lpf="+str(STARTING_LPF)+",azmq=bind_address=tcp\\\\\\://127.0.0.1\\\\\\:"+str(port)+"' "+audio
+    return "ffplay -ss 14 -hide_banner -loglevel error -nodisp -loop 0 -af 'volume@vol="+str(STARTING_VOLUME)+",lowpass@lpf="+str(STARTING_LPF)+",azmq=bind_address=tcp\\\\\\://127.0.0.1\\\\\\:"+str(port)+"' "+audio
 
 class AudioStreams():
 
@@ -35,6 +36,14 @@ class AudioStreams():
         if (platform.system() == "Windows"):
             cmd_lpf = "echo ain't no way youre changing anything buddy."
         subprocess.run(cmd_lpf, shell=True)
+        print("LPF Changed succesfully for port "+str(port))
+    
+    def change_vol(self, volume ,port):
+        print("Changing lpf for port "+str(port))
+        cmd_vol = "echo volume@vol volume "+str(volume)+" | zmqsend -b tcp://127.0.0.1:"+str(port)
+        if (platform.system() == "Windows"):
+            cmd_vol = "echo ain't no way youre changing anything buddy."
+        subprocess.run(cmd_vol, shell=True)
         print("LPF Changed succesfully for port "+str(port))
 
     def stop_streams(self):
