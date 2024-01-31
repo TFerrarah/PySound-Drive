@@ -82,8 +82,9 @@ class OBDHandler():
         return r
 
     def rpm_to_vol(self, percentage):
-        r = 0.000260417*math.e**{27.7259*percentage}-0.0666667
-        if r < 0 : r = 0
+        r = 25.1634*percentage**0.0395332-23.8083
+        if r < 0 : r = 0 
+        elif r > 1 : r = 1
         return r
     
     def pedal_to_vol(self, percentage):
