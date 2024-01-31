@@ -1,23 +1,5 @@
-import time
-from OBDHandler import OBDHandler
+import obd
 
-p = OBDHandler()
-MAX_RPM = 5000
+connection = obd.OBD('/dev/tty.OBDII', 9600, protocol=7, fast=False)
 
-try:
-    while True:
-        time.sleep(0.05)
-
-        # Get values
-        frequencies = p.get_frequencies()
-        
-        # speed frequency (Hz) = frequencies["speed"]
-
-        # Apply lpf
-
-        
-
-
-except KeyboardInterrupt:
-    print("cya")
-
+print(connection.status())

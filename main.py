@@ -18,9 +18,7 @@ original_song = cwd+"/Audio/Original.mp3"
 # Only Bass, Drums, Vocals and "Other" channels will be used
 audio_components = [separated_audio_dir+file for file in os.listdir(separated_audio_dir) if file.endswith(tuple(AUDIO_EXT))]
 
-
 handler = OBDHandler()
-
 
 loop = AudioStreams(audio_components) # ! THIS IS WHERE AUDIO STARTS PLAYING
 zmq = "T:\Tommaso\Downloads\\ffmpeg-tools-2022-01-01-git-d6b2357edd\\ffmpeg-tools-2022-01-01-git-d6b2357edd\\bin\zmqsend.exe"
@@ -38,19 +36,22 @@ try:
         time.sleep(0.05) # The less this value, the more accurate and responsive the audio change will be.
 
         frequencies = handler.get_frequencies()
+        print(handler.get_pedal())
 
         # calculate lpf frequency
 
         bass_freq = average([frequencies["pedal"], frequencies["rpm"]], weights=[.5, 1])
         drums_freq = average([frequencies["pedal"], frequencies["rpm"], frequencies["speed"]], weights=[.2, .2, 1])
         other_freq = average([frequencies["pedal"], frequencies["rpm"], frequencies["speed"]], weights=[.2, .2, 1])
-        vocals_freq = average([frequencies["pedal"], frequencies["rpm"], frequencies["speed"]], weights=[.2, .6, 1])
+        vocals_freq = average([frequencies["speed"]], weights=[1])
+
+        print(vocals_freq)
 
         # Set LPF frequency
-        loop.change_lpf(bass_freq, bass_port, zmq)
-        loop.change_lpf(drums_freq, drums_port, zmq)
-        loop.change_lpf(other_freq, other_port, zmq)
-        loop.change_lpf(vocals_freq, vocals_port, zmq)
+        loop.change_lpf(bass_freq, bass_port)
+        loop.change_lpf(drums_freq, drums_port)
+        loop.change_lpf(other_freq, other_port)
+        loop.change_lpf(10, vocals_port)
         
 
 except KeyboardInterrupt:

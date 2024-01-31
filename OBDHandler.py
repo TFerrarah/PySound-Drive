@@ -1,14 +1,14 @@
 import obd
 import math
 
+obd.logger.setLevel(obd.logging.DEBUG)
+
 MAX_SPEED = 150
 
 class OBDHandler():
     def __init__(self):
         # Create connection
-        self.ports = obd.scan_serial()
-        print(self.ports)
-        self.connection = obd.OBD(self.ports[0]) # auto-connects to USB or RF port
+        self.connection = obd.OBD("/dev/tty.OBDII", baudrate=9600, protocol="7", fast=False) # auto-connects to USB or RF port
 
         # Set max RPM
         while True:
@@ -41,7 +41,7 @@ class OBDHandler():
         # cmd = obd.commands[1][17] # Uncomment for emulator use only
         response = self.connection.query(cmd)
         # response_percent = response.value.magnitude * 0.01
-        response_percent = (response.value.magnitude-31.5)*4 # Slightly modified lesageethan's percentage formula for Carmony
+        response_percent = (response.value.magnitude-31.5)*0.02 # Slightly modified lesageethan's percentage formula for Carmony
         if response_percent<0:
             return 0
         return response_percent# user-friendly unit conversions
