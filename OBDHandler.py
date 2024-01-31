@@ -26,18 +26,7 @@ class OBDHandler():
 
 
         # Create connection
-        self.connection = obd.OBD(ports[self.obd_port], baudrate=9600, protocol="7", fast=False) # auto-connects to USB or RF port
-
-        # Set max RPM
-        while True:
-            try:
-                self.max_rpm = int(input("Please enter your car's redline RPM [e.g. 4500, 8000]: "))
-                if 0 <= self.max_rpm <= 15000:
-                    break
-                else:
-                    print("Max RPM must be between 0 - 15000")
-            except ValueError:
-                print("Input not recognized. Try again")
+        self.connection = obd.OBD(ports[self.obd_port], baudrate=115200, protocol="7", fast=False) # auto-connects to USB or RF port
 
         # Reset values
         self.speed = 0
@@ -122,19 +111,19 @@ class OBDHandler():
         r = 25.1634*percentage**0.0395332-23.8083
         if r < 0 : r = 0 
         elif r > 1 : r = 1
-        return r
+        return percentage + .5 # Temporary solution to low output volume from idle rpm
     
     def pedal_to_vol(self, percentage):
         return percentage
 
     
     def normalize_value(self, curr, min_value, max_value):
-        curr = max(min_value, curr)
-        max_value = max(min_value, max_value)
+        # curr = max(min_value, curr)
+        # max_value = max(min_value, max_value)
 
-        normalized_value = curr / max_value
+        # normalized_value = curr / max_value
 
-        normalized_value = min(1, max(min_value, normalized_value))
+        normalized_value = (curr - min_value) / (max_value - min_value)
 
         return normalized_value
     
