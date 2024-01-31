@@ -1,5 +1,7 @@
 import obd
+import time
 import math
+import json
 
 # obd.logger.setLevel(obd.logging.DEBUG)
 
@@ -41,6 +43,8 @@ class OBDHandler():
         self.speed = 0
         self.rpm = 0
         self.pedal = 0
+        self.min_pedal = 0.0
+        self.max_pedal = 1.0
 
     def get_speed(self):
         cmd = obd.commands.SPEED
@@ -56,11 +60,35 @@ class OBDHandler():
         cmd = obd.commands.ACCELERATOR_POS_D
         # cmd = obd.commands[1][17] # Uncomment for emulator use only
         response = self.connection.query(cmd)
-        # response_percent = response.value.magnitude
-        response_percent = (response.value.magnitude-19.9)*0.02 # Slightly modified lesageethan's percentage formula for Carmony
+        response_percent = response.value.magnitude
+        # response_percent = (response.value.magnitude-19.9)*0.02 # Slightly modified lesageethan's percentage formula for Carmony
         if response_percent<0:
             return 0
         return response_percent# user-friendly unit conversions
+    
+    def get_raw_pedal(self):
+        cmd = obd.commands.ACCELERATOR_POS_D
+        response=self.connection.query(cmd)
+        response_percent = response.value.magnitude
+        return response_percent
+    
+    def get_redline(self):
+        # Read file
+        with open("car_ranges.json", "r") as json_file:
+            car_values = json.load(json_file)
+            return car_values["redline"]
+    
+    def get_idle(self):
+        # Read file
+        with open("car_ranges.json", "r") as json_file:
+            car_values = json.load(json_file)
+            return car_values["idle"]
+        
+    def get_pedal_minmax(self):
+        # Read file
+        with open("car_ranges.json", "r") as json_file:
+            car_values = json.load(json_file)
+            return car_values["pedal"]
 
     def refresh_values(self): # Also taken from lesageethan's Carmony
         self.speed = self.get_speed()
@@ -100,36 +128,75 @@ class OBDHandler():
         return percentage
 
     
-    def normalize_value(self, curr, max_value):
-        curr = max(0, curr)
-        max_value = max(0, max_value)
+    def normalize_value(self, curr, min_value, max_value):
+        curr = max(min_value, curr)
+        max_value = max(min_value, max_value)
 
         normalized_value = curr / max_value
 
-        normalized_value = min(1, max(0, normalized_value))
+        normalized_value = min(1, max(min_value, normalized_value))
 
         return normalized_value
+    
+    def calibrate_pedal(self):
+        print("Pedal calibration will now begin. Please put your key in MAR position (Engine off) and press ENTER when you're ready")
+
+        min_values = []
+        max_values = []
+
+        # Get min pedal value
+        print("LIFT your foot COMPLETELY from the GAS PEDAL and wait 3 seconds...")
+        time.sleep(3)
+        for i in range(1,5):
+            print("["+str(i)+"] Reading pedal information...")
+            min_values.append(self.get_raw_pedal())
+            time.sleep(0.5)
+        
+        self.min_pedal = sum(min_values) / len(min_values)
+        print("MIN Pedal value: "+str(self.min_pedal))
+
+        time.sleep(1)
+
+        input("Maximum pedal value measurement will now begin.\nPlease get ready to push your gas pedal and press ENTER to continue...")
+
+        # Get max pedal value
+        print("PUSH your GAS PEDAL to FULL and hold it still...")
+        time.sleep(2)
+        for i in range(1,5):
+            print("!KEEP PUSHING!")
+            print("["+str(i)+"] Reading pedal information...")
+            max_values.append(self.get_raw_pedal())
+            time.sleep(0.5)
+
+        self.max_pedal = sum(max_values) / len(max_values)
+        print("MAX Pedal value: "+str(self.max_pedal))
+
+        print("✅ Calibration complete ✅")
+
+        return [self.min_pedal, self.max_pedal]
+             
+
 
     def get_percentages(self):
         self.refresh_values()
         return {
-            "speed": self.normalize_value(self.speed, MAX_SPEED), # Speed_normalized = 2/300 * real speed
-            "rpm": self.normalize_value(self.rpm, self.max_rpm),
-            "pedal": self.pedal
+            "speed": self.normalize_value(self.speed, 0 , MAX_SPEED), # Speed_normalized = 2/300 * real speed
+            "rpm": self.normalize_value(self.rpm, self.get_idle() , self.get_redline()),
+            "pedal": self.normalize_value(self.pedal, self.get_pedal_minmax()[0], self.get_pedal_minmax()[1])
         }
     
     def get_frequencies(self):
         self.refresh_values() # Auto refresh values
         return {
-            "speed": self.speed_to_freq(self.normalize_value(self.speed, MAX_SPEED)),
-            "rpm": self.rpm_to_freq(self.normalize_value(self.rpm, self.max_rpm)),
-            "pedal": self.pedal_to_freq(self.pedal)
+            "speed": self.speed_to_freq(self.normalize_value(self.speed, 0 , MAX_SPEED)),
+            "rpm": self.rpm_to_freq(self.normalize_value(self.rpm, self.get_idle() , self.get_redline())),
+            "pedal": self.pedal_to_freq(self.normalize_value(self.pedal, self.get_pedal_minmax()[0], self.get_pedal_minmax()[1]))
         }
     
     def get_volumes(self):
         self.refresh_values() # Auto refresh values
         return {
-            "speed": self.speed_to_vol(self.normalize_value(self.speed, MAX_SPEED)),
-            "rpm": self.rpm_to_vol(self.normalize_value(self.rpm, self.max_rpm)),
-            "pedal": self.pedal_to_vol(self.pedal) # This won't really get used
+            "speed": self.speed_to_vol(self.normalize_value(self.speed, 0 , MAX_SPEED)),
+            "rpm": self.rpm_to_vol(self.normalize_value(self.rpm, self.get_idle() , self.get_redline())),
+            "pedal": self.pedal_to_vol(self.normalize_value(self.pedal, self.get_pedal_minmax()[0], self.get_pedal_minmax()[1]))
         }

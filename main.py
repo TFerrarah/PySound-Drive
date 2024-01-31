@@ -1,16 +1,16 @@
 import os
 import time
+import json
 from numpy import average
 from AudioStreams import AudioStreams
 from OBDHandler import OBDHandler
-
 
 # Audio Stuff
 cwd = os.getcwd();
 separated_audio_dir = cwd+"/Audio/Separated/"
 AUDIO_EXT = [".mp3", ".m4a", ".flac", ".wav"] # You can add more audio extensions here, as long as they are supported in ffplay
 
-# Get audio files
+# TODO REMOVE ORIGINAL SONG
 original_song = cwd+"/Audio/Original.mp3"
 
 # List of absolute paths for the component of the song
@@ -18,10 +18,51 @@ original_song = cwd+"/Audio/Original.mp3"
 # Only Bass, Drums, Vocals and "Other" channels will be used
 audio_components = [separated_audio_dir+file for file in os.listdir(separated_audio_dir) if file.endswith(tuple(AUDIO_EXT))]
 
+# Manage car's values file
+json_base = {"pedal" : [-1,-1],"redline" : -1,"idle" : -1}
+
+#   Create JSON if not present
+if not os.path.exists("car_ranges.json"):
+    with open("car_ranges.json", "w") as json_file:
+        json_file.write(json.dumps(json_base))
+
 handler = OBDHandler()
 
+with open("car_ranges.json", "r+") as json_file:
+    car_values = json.load(json_file)
+    if car_values["idle"] < 0 or car_values["redline"] < 0 or car_values["pedal"] == [-1,-1]:
+        input("No PySound-Drive calibration data was found. Press ENTER when you're ready for PySound-Drive calibration...")
+        # Calibrate idle rpm
+        while True:
+            try:
+                car_values["idle"] = int(input("Please enter your car's idle RPM [e.g. 950, 1000]: "))
+                if 0 <= car_values["idle"] <= 15000:
+                    break
+                else:
+                    print("Idle RPM must be between 0 - 15000")
+            except ValueError:
+                print("Input not recognized. Try again")
+
+        # Calibrate redline rpm
+        while True:
+            try:
+                car_values["redline"] = int(input("Please enter your car's redline RPM [e.g. 4500, 8000]: "))
+                if 0 <= car_values["redline"] <= 15000:
+                    break
+                else:
+                    print("Redline RPM must be between 0 - 15000")
+            except ValueError:
+                print("Input not recognized. Try again")
+
+        # Calibrate pedal
+        car_values["pedal"] = handler.calibrate_pedal()
+
+        # Write to file
+        json_file.seek(0)
+        json_file.write(json.dumps(car_values))
+        json_file.truncate()
+
 loop = AudioStreams(audio_components) # ! THIS IS WHERE AUDIO STARTS PLAYING
-zmq = "T:\Tommaso\Downloads\\ffmpeg-tools-2022-01-01-git-d6b2357edd\\ffmpeg-tools-2022-01-01-git-d6b2357edd\\bin\zmqsend.exe"
 
 print(loop.get_streams_ports())
 
@@ -52,10 +93,14 @@ try:
         drums_vol = average([volumes["speed"]], weights=[1])
         vocals_vol = average([volumes["speed"]], weights=[1])
 
-        # print([bass_freq, drums_freq, other_freq, vocals_freq])
-        # print([bass_vol, drums_vol, other_vol, vocals_vol])
-        # print(volumes)
+        print("FREQUENCIES ↓")
+        print([bass_freq, drums_freq, other_freq, vocals_freq])
+        print("VOLUMES ↓")
+        print([bass_vol, drums_vol, other_vol, vocals_vol])
+        print("RAW VOLUMES ↓")
+        print(volumes)
 
+        print("RAW PERCENTAGES ↓")
         print(handler.get_percentages())
 
         # Set Volumes
