@@ -49,24 +49,26 @@ try:
 
         bass_vol = average([volumes["pedal"], volumes["rpm"]], weights=[.5, 1])
         other_vol = average([volumes["pedal"], volumes["rpm"], volumes["speed"]], weights=[.2, 1, .2])
-        drums_freq = average([volumes["speed"]], weights=[1])
-        vocals_freq = average([volumes["speed"]], weights=[1])
+        drums_vol = average([volumes["speed"]], weights=[1])
+        vocals_vol = average([volumes["speed"]], weights=[1])
+
+        # print([bass_freq, drums_freq, other_freq, vocals_freq])
+        # print([bass_vol, drums_vol, other_vol, vocals_vol])
+        # print(volumes)
+
+        print(handler.get_percentages())
 
         # Set Volumes
-        loop.change_vol(bass_freq, bass_port)
-        loop.change_vol(drums_freq, drums_port)
-        loop.change_vol(other_freq, other_port)
-        loop.change_vol(vocals_freq, vocals_port)
-        print(volumes)
-
-        print("volumes ↑ | Frequencies ↓")
+        loop.change_vol(bass_vol, bass_port)
+        loop.change_vol(drums_vol, drums_port)
+        loop.change_vol(other_vol, other_port)
+        loop.change_vol(vocals_vol, vocals_port)
 
         # Set LPF frequency
         loop.change_lpf(bass_freq, bass_port)
         loop.change_lpf(drums_freq, drums_port)
         loop.change_lpf(other_freq, other_port)
         loop.change_lpf(vocals_freq, vocals_port)
-        print(frequencies)
         
 
 except KeyboardInterrupt:

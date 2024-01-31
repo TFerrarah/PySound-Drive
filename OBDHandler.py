@@ -1,7 +1,7 @@
 import obd
 import math
 
-obd.logger.setLevel(obd.logging.DEBUG)
+# obd.logger.setLevel(obd.logging.DEBUG)
 
 MAX_SPEED = 150
 
@@ -56,8 +56,8 @@ class OBDHandler():
         cmd = obd.commands.ACCELERATOR_POS_D
         # cmd = obd.commands[1][17] # Uncomment for emulator use only
         response = self.connection.query(cmd)
-        # response_percent = response.value.magnitude * 0.01
-        response_percent = (response.value.magnitude-31.5)*0.02 # Slightly modified lesageethan's percentage formula for Carmony
+        # response_percent = response.value.magnitude
+        response_percent = (response.value.magnitude-19.9)*0.02 # Slightly modified lesageethan's percentage formula for Carmony
         if response_percent<0:
             return 0
         return response_percent# user-friendly unit conversions
@@ -68,13 +68,22 @@ class OBDHandler():
         self.pedal = self.get_pedal()
     
     def pedal_to_freq(self, percentage):
-        return -31005.6*percentage**2+51178*percentage-41.8572 # Formula calculated using https://www.dcode.fr/function-equation-finder
+        r= 20000 * percentage + 3 # Formula calculated using https://www.dcode.fr/function-equation-finder
+        if r < 200 : r = 200 
+        elif r > 20000 : r = 20000
+        return r
     
     def rpm_to_freq(self, percentage):
-        return 68241*percentage-13525.3 # Formula calculated using https://www.dcode.fr/function-equation-finder
+        r= 68241*percentage-13525.3 # Formula calculated using https://www.dcode.fr/function-equation-finder
+        if r < 200 : r = 200 
+        elif r > 20000 : r = 20000
+        return r
     
     def speed_to_freq(self, percentage):
-        return 1874.42*math.log(2079.27*percentage+0.0331104)+6587.76 # Formula calculated using https://www.dcode.fr/function-equation-finder
+        r=1874.42*math.log(2079.27*percentage+0.0331104)+6587.76 # Formula calculated using https://www.dcode.fr/function-equation-finder
+        if r < 200 : r = 200 
+        elif r > 20000 : r = 20000
+        return r
     
     def speed_to_vol(self, percentage):
         r = 5.49451*percentage**2+3.9011*percentage
