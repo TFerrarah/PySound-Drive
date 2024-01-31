@@ -5,6 +5,8 @@ from numpy import average
 from AudioStreams import AudioStreams
 from OBDHandler import OBDHandler
 
+DEBUG = False
+
 # Audio Stuff
 cwd = os.getcwd();
 separated_audio_dir = cwd+"/Audio/Separated/"
@@ -74,7 +76,7 @@ vocals_port = loop.get_streams_ports()["Vocals"]
 
 try:
     while True:
-        time.sleep(0.05) # The less this value, the more accurate and responsive the audio change will be.
+        time.sleep(0.01) # The less this value, the more accurate and responsive the audio change will be.
 
         frequencies = handler.get_frequencies()
         volumes = handler.get_volumes()
@@ -89,19 +91,23 @@ try:
         # Calculate volumes
 
         bass_vol = average([volumes["pedal"], volumes["rpm"]], weights=[.5, 1])
-        other_vol = average([volumes["pedal"], volumes["rpm"], volumes["speed"]], weights=[.2, 1, .2])
+        other_vol = average([volumes["pedal"], volumes["rpm"], volumes["speed"]], weights=[.4, 1, .2])
         drums_vol = average([volumes["speed"]], weights=[1])
         vocals_vol = average([volumes["speed"]], weights=[1])
+        
+        if DEBUG == True:
+            print("FREQUENCIES ↓")
+            print([bass_freq, drums_freq, other_freq, vocals_freq])
+            print("VOLUMES ↓")
+            print([bass_vol, drums_vol, other_vol, vocals_vol])
+            print("RAW VOLUMES ↓")
+            print(volumes)
 
-        print("FREQUENCIES ↓")
-        print([bass_freq, drums_freq, other_freq, vocals_freq])
-        print("VOLUMES ↓")
-        print([bass_vol, drums_vol, other_vol, vocals_vol])
-        print("RAW VOLUMES ↓")
-        print(volumes)
+            print("RAW FREQUENCIES ↓")
+            print(frequencies)
 
-        print("RAW PERCENTAGES ↓")
-        print(handler.get_percentages())
+            print("RAW PERCENTAGES ↓")
+            print(handler.get_percentages())
 
         # Set Volumes
         loop.change_vol(bass_vol, bass_port)
