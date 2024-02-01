@@ -183,7 +183,6 @@ class OBDHandler():
         }
     
     def get_volumes(self):
-        print("Calculated rpm: "+str(self.normalize_value(self.rpm, self.get_idle() , self.get_redline())))
         return {
             "speed": self.speed_to_vol(self.speed),
             "rpm": self.rpm_to_vol(self.normalize_value(self.rpm, self.get_idle() , self.get_redline())),
