@@ -6,6 +6,7 @@ from AudioStreams import AudioStreams
 from OBDHandler import OBDHandler
 
 DEBUG = False
+VERBOSE = True
 
 # Audio Stuff
 cwd = os.getcwd();
@@ -86,22 +87,29 @@ try:
         volumes = handler.get_volumes()
 
         # calculate lpf frequency
-        bass_freq = average([frequencies["pedal"], frequencies["rpm"]], weights=[.5, 1])
+        if volumes["speed"] < 1: bass_freq = average([frequencies["pedal"], frequencies["rpm"]], weights=[.5, 1])
+        else: bass_freq = frequencies["speed"]
+
         drums_freq = average([frequencies["pedal"], frequencies["rpm"], frequencies["speed"]], weights=[.2, .2, 1])
         other_freq = average([frequencies["pedal"], frequencies["rpm"], frequencies["speed"]], weights=[.2, .2, 1])
-        vocals_freq = average([frequencies["speed"]], weights=[1])
+
+        vocals_freq = frequencies["speed"]
 
         # Calculate volumes
-        bass_vol = average([volumes["pedal"], volumes["rpm"]], weights=[.5, 1])
+        if volumes["speed"] < 1: bass_vol = average([volumes["pedal"], volumes["rpm"]], weights=[.5, 1])
+        else: bass_vol = volumes["speed"]
+
         other_vol = average([volumes["pedal"], volumes["rpm"], volumes["speed"]], weights=[.4, 1, .2])
         drums_vol = average([volumes["speed"]], weights=[1])
-        vocals_vol = average([volumes["speed"]], weights=[1])
+        
+        vocals_vol = volumes["speed"]
 
-        if DEBUG:
+        if VERBOSE:
             print("[RAW]    Speed =" + str(handler.get_speed()))
             print("[RAW]    RPM =" + str(handler.get_rpm()))
             print("[RAW]    Pedal =" + str(handler.get_pedal()))
 
+        if DEBUG:
             print("[CALC]   FREQUENCIES ↓")
             print([bass_freq, drums_freq, other_freq, vocals_freq])
             print("[CALC]   VOLUMES ↓")
