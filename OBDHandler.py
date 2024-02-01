@@ -29,7 +29,7 @@ class OBDHandler():
         # ports[self.obd_port] = "/dev/ttys010"
 
         # Create connection
-        self.connection = obd.OBD(ports[self.obd_port], baudrate=115200, protocol="7", fast=False) # auto-connects to USB or RF port
+        self.connection = obd.OBD(ports[self.obd_port], baudrate=115200, protocol="7", fast=False) # a
 
         # Reset values
         self.speed = 0
@@ -56,16 +56,15 @@ class OBDHandler():
         return response.value.magnitude
     
     def get_pedal(self):
-        # cmd = obd.commands.ACCELERATOR_POS_D
-        cmd = obd.commands[1][17] # Uncomment for emulator use only
+        cmd = obd.commands.ACCELERATOR_POS_D
+        # cmd = obd.commands[1][17] # Uncomment for emulator use only
         response = self.connection.query(cmd)
         response_percent = response.value.magnitude
-        # response_percent = (response.value.magnitude-19.9)*0.02 # Slightly modified lesageethan's percentage formula for Carmony
         if response_percent<0:
             return 0
-        return response_percent# user-friendly unit conversions
+        return response_percent
     
-    def get_raw_pedal(self): # Used in calibration
+    def get_raw_pedal(self): # Used in pedal_calibration
         cmd = obd.commands.ACCELERATOR_POS_D
         response=self.connection.query(cmd)
         response_percent = response.value.magnitude
@@ -76,6 +75,8 @@ class OBDHandler():
         self.rpm = self.get_rpm()
         self.pedal = self.get_pedal()
     
+    # Value to frequency conversion formulas
+
     def pedal_to_freq(self, percentage):
         r= 20000 * percentage + 3 # Formula calculated using https://www.dcode.fr/function-equation-finder
         if r < 200 : r = 200 
@@ -94,6 +95,8 @@ class OBDHandler():
         elif r > 20000 : r = 20000
         return r
     
+    # Value to volume conversion formulas
+
     def speed_to_vol(self, raw_speed):
         if raw_speed <= 40: r = 0.000940424*raw_speed**2-0.00357231*raw_speed -0.0102372 
         else: r = 1
@@ -108,6 +111,8 @@ class OBDHandler():
         elif r > 1 : r = 1
         return percentage + .2 # Idle rpm volume is too low, so we add a constant value to it
     
+    # Utility functions
+
     def normalize_value(self, curr, min_value, max_value):
         normalized_value = (curr - min_value) / (max_value - min_value)
         return normalized_value
