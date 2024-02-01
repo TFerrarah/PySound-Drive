@@ -96,19 +96,22 @@ try:
         other_vol = average([volumes["pedal"], volumes["rpm"], volumes["speed"]], weights=[.4, 1, .2])
         drums_vol = average([volumes["speed"]], weights=[1])
         vocals_vol = average([volumes["speed"]], weights=[1])
-        
-        if DEBUG == True:
-            print("FREQUENCIES ↓")
+
+        if DEBUG:
+            print("[RAW]    Speed =" + str(handler.get_speed()))
+            print("[RAW]    RPM =" + str(handler.get_rpm()))
+            print("[RAW]    Pedal =" + str(handler.get_pedal()))
+
+            print("[CALC]   FREQUENCIES ↓")
             print([bass_freq, drums_freq, other_freq, vocals_freq])
-            print("VOLUMES ↓")
+            print("[CALC]   VOLUMES ↓")
             print([bass_vol, drums_vol, other_vol, vocals_vol])
-            print("RAW VOLUMES ↓")
+
+            print("[CALC]   RAW VOLUMES ↓")
             print(volumes)
-
-            print("RAW FREQUENCIES ↓")
+            print("[CALC]   RAW FREQUENCIES ↓")
             print(frequencies)
-
-            print("RAW PERCENTAGES ↓")
+            print("[CALC]   RAW PERCENTAGES ↓")
             print(handler.get_percentages())
 
         # Set Volumes
