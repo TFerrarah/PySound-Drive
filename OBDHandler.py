@@ -26,8 +26,7 @@ class OBDHandler():
             
 
         # ! Uncomment for emulator use only
-
-        ports[self.obd_port] = "/dev/ttys010"
+        # ports[self.obd_port] = "/dev/ttys010"
 
         # Create connection
         self.connection = obd.OBD(ports[self.obd_port], baudrate=115200, protocol="7", fast=False) # auto-connects to USB or RF port
