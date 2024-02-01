@@ -23,7 +23,11 @@ class OBDHandler():
                     print("Port number is not valid. Please try again")
             except ValueError:
                 print("Input not recognized. Try again")
+            
 
+        # ! Uncomment for emulator use only
+
+        ports[self.obd_port] = "/dev/ttys010"
 
         # Create connection
         self.connection = obd.OBD(ports[self.obd_port], baudrate=115200, protocol="7", fast=False) # auto-connects to USB or RF port
@@ -46,8 +50,8 @@ class OBDHandler():
         return response.value.magnitude
     
     def get_pedal(self):
-        cmd = obd.commands.ACCELERATOR_POS_D
-        # cmd = obd.commands[1][17] # Uncomment for emulator use only
+        # cmd = obd.commands.ACCELERATOR_POS_D
+        cmd = obd.commands[1][17] # Uncomment for emulator use only
         response = self.connection.query(cmd)
         response_percent = response.value.magnitude
         # response_percent = (response.value.magnitude-19.9)*0.02 # Slightly modified lesageethan's percentage formula for Carmony
@@ -103,16 +107,18 @@ class OBDHandler():
         return r
     
     def speed_to_vol(self, raw_speed):
-        r = -0.000675465*raw_speed**2+0.055912*raw_speed-0.0998477
+        if raw_speed <= 40: r = 0.000940424*raw_speed**2-0.00357231*raw_speed -0.0102372 
+        else: r = 1
+
         if r < 0 : r = 0 
         elif r > 1 : r = 1
         return r
 
     def rpm_to_vol(self, percentage):
-        r = 25.1634*percentage**0.0395332-23.8083
+        r = 2 * percentage
         if r < 0 : r = 0 
         elif r > 1 : r = 1
-        return percentage + .5 # Temporary solution to low output volume from idle rpm
+        return percentage + .2 # Temporary solution to low output volume from idle rpm
     
     def pedal_to_vol(self, percentage):
         return percentage
@@ -177,8 +183,9 @@ class OBDHandler():
         }
     
     def get_volumes(self):
+        print("Calculated rpm: "+str(self.normalize_value(self.rpm, self.get_idle() , self.get_redline())))
         return {
-            "speed": self.speed_to_vol(self.normalize_value(self.speed, 0 , MAX_SPEED)),
+            "speed": self.speed_to_vol(self.speed),
             "rpm": self.rpm_to_vol(self.normalize_value(self.rpm, self.get_idle() , self.get_redline())),
             "pedal": self.pedal_to_vol(self.normalize_value(self.pedal, self.get_pedal_minmax()[0], self.get_pedal_minmax()[1]))
         }
