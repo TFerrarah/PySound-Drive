@@ -35,8 +35,15 @@ class OBDHandler():
         self.speed = 0
         self.rpm = 0
         self.pedal = 0
-        self.min_pedal = 0.0
-        self.max_pedal = 1.0
+
+        # Read values from JSON file
+        with open("car_ranges.json", "r") as json_file:
+            car_values = json.load(json_file)
+            self.min_pedal = car_values["pedal"][0]
+            self.max_pedal = car_values["pedal"][1]
+            self.redline = car_values["redline"]
+            self.idle = car_values["idle"]
+        
 
     def get_speed(self):
         cmd = obd.commands.SPEED
@@ -58,29 +65,11 @@ class OBDHandler():
             return 0
         return response_percent# user-friendly unit conversions
     
-    def get_raw_pedal(self):
+    def get_raw_pedal(self): # Used in calibration
         cmd = obd.commands.ACCELERATOR_POS_D
         response=self.connection.query(cmd)
         response_percent = response.value.magnitude
         return response_percent
-    
-    def get_redline(self):
-        # Read file
-        with open("car_ranges.json", "r") as json_file:
-            car_values = json.load(json_file)
-            return car_values["redline"]
-    
-    def get_idle(self):
-        # Read file
-        with open("car_ranges.json", "r") as json_file:
-            car_values = json.load(json_file)
-            return car_values["idle"]
-        
-    def get_pedal_minmax(self):
-        # Read file
-        with open("car_ranges.json", "r") as json_file:
-            car_values = json.load(json_file)
-            return car_values["pedal"]
 
     def refresh_values(self): # Also taken from lesageethan's Carmony
         self.speed = self.get_speed()
@@ -117,16 +106,10 @@ class OBDHandler():
         r = 2 * percentage
         if r < 0 : r = 0 
         elif r > 1 : r = 1
-        return percentage + .2 # Temporary solution to low output volume from idle rpm
-    
-    def pedal_to_vol(self, percentage):
-        return percentage
-
+        return percentage + .2 # Idle rpm volume is too low, so we add a constant value to it
     
     def normalize_value(self, curr, min_value, max_value):
-
         normalized_value = (curr - min_value) / (max_value - min_value)
-
         return normalized_value
     
     def calibrate_pedal(self):
@@ -167,23 +150,22 @@ class OBDHandler():
         return [self.min_pedal, self.max_pedal]
 
     def get_percentages(self):
-        self.refresh_values()
         return {
             "speed": self.normalize_value(self.speed, 0 , MAX_SPEED), # Speed_normalized = 2/300 * real speed
-            "rpm": self.normalize_value(self.rpm, self.get_idle() , self.get_redline()),
-            "pedal": self.normalize_value(self.pedal, self.get_pedal_minmax()[0], self.get_pedal_minmax()[1])
+            "rpm": self.normalize_value(self.rpm, self.idle , self.redline),
+            "pedal": self.normalize_value(self.pedal, self.min_pedal, self.max_pedal)
         }
     
     def get_frequencies(self):
         return {
             "speed": self.speed_to_freq(self.normalize_value(self.speed, 0 , MAX_SPEED)),
-            "rpm": self.rpm_to_freq(self.normalize_value(self.rpm, self.get_idle() , self.get_redline())),
-            "pedal": self.pedal_to_freq(self.normalize_value(self.pedal, self.get_pedal_minmax()[0], self.get_pedal_minmax()[1]))
+            "rpm": self.rpm_to_freq(self.normalize_value(self.rpm, self.idle , self.redline)),
+            "pedal": self.pedal_to_freq(self.normalize_value(self.pedal, self.min_pedal, self.max_pedal))
         }
     
     def get_volumes(self):
         return {
             "speed": self.speed_to_vol(self.speed),
-            "rpm": self.rpm_to_vol(self.normalize_value(self.rpm, self.get_idle() , self.get_redline())),
-            "pedal": self.pedal_to_vol(self.normalize_value(self.pedal, self.get_pedal_minmax()[0], self.get_pedal_minmax()[1]))
+            "rpm": self.rpm_to_vol(self.normalize_value(self.rpm, self.idle , self.redline)),
+            "pedal": self.normalize_value(self.pedal, self.min_pedal, self.max_pedal) # This value is already a percentage, thus it doens't need a special formula
         }
