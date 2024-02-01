@@ -102,9 +102,10 @@ class OBDHandler():
         elif r > 20000 : r = 20000
         return r
     
-    def speed_to_vol(self, percentage):
-        r = 5.49451*percentage**2+3.9011*percentage
-        if r > 1 : r=1
+    def speed_to_vol(self, raw_speed):
+        r = -0.000675465*raw_speed**2+0.055912*raw_speed-0.0998477
+        if r < 0 : r = 0 
+        elif r > 1 : r = 1
         return r
 
     def rpm_to_vol(self, percentage):
@@ -118,10 +119,6 @@ class OBDHandler():
 
     
     def normalize_value(self, curr, min_value, max_value):
-        # curr = max(min_value, curr)
-        # max_value = max(min_value, max_value)
-
-        # normalized_value = curr / max_value
 
         normalized_value = (curr - min_value) / (max_value - min_value)
 
@@ -163,8 +160,6 @@ class OBDHandler():
         print("✅ Calibration complete ✅")
 
         return [self.min_pedal, self.max_pedal]
-             
-
 
     def get_percentages(self):
         self.refresh_values()
@@ -175,7 +170,6 @@ class OBDHandler():
         }
     
     def get_frequencies(self):
-        self.refresh_values() # Auto refresh values
         return {
             "speed": self.speed_to_freq(self.normalize_value(self.speed, 0 , MAX_SPEED)),
             "rpm": self.rpm_to_freq(self.normalize_value(self.rpm, self.get_idle() , self.get_redline())),
@@ -183,7 +177,6 @@ class OBDHandler():
         }
     
     def get_volumes(self):
-        self.refresh_values() # Auto refresh values
         return {
             "speed": self.speed_to_vol(self.normalize_value(self.speed, 0 , MAX_SPEED)),
             "rpm": self.rpm_to_vol(self.normalize_value(self.rpm, self.get_idle() , self.get_redline())),

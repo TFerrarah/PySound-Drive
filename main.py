@@ -78,18 +78,20 @@ try:
     while True:
         time.sleep(0.01) # The less this value, the more accurate and responsive the audio change will be.
 
+        # Get new values
+        handler.refresh_values()
+
+        # Get new volume and frequency values
         frequencies = handler.get_frequencies()
         volumes = handler.get_volumes()
 
         # calculate lpf frequency
-
         bass_freq = average([frequencies["pedal"], frequencies["rpm"]], weights=[.5, 1])
         drums_freq = average([frequencies["pedal"], frequencies["rpm"], frequencies["speed"]], weights=[.2, .2, 1])
         other_freq = average([frequencies["pedal"], frequencies["rpm"], frequencies["speed"]], weights=[.2, .2, 1])
         vocals_freq = average([frequencies["speed"]], weights=[1])
 
         # Calculate volumes
-
         bass_vol = average([volumes["pedal"], volumes["rpm"]], weights=[.5, 1])
         other_vol = average([volumes["pedal"], volumes["rpm"], volumes["speed"]], weights=[.4, 1, .2])
         drums_vol = average([volumes["speed"]], weights=[1])
