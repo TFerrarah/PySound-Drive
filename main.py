@@ -15,9 +15,6 @@ cwd = os.getcwd();
 separated_audio_dir = cwd+"/Audio/Separated/"
 AUDIO_EXT = [".mp3", ".m4a", ".flac", ".wav"] # You can add more audio extensions here, as long as they are supported in ffplay
 
-# TODO REMOVE ORIGINAL SONG
-original_song = cwd+"/Audio/Original.mp3"
-
 # List of absolute paths for the component of the song
 # This is done to ensure future-proofing to enable variations of other audio channels
 # Only Bass, Drums, Vocals and "Other" channels will be used
@@ -32,8 +29,6 @@ CAR_INFO_FILENAME = "car_ranges.json"
 if not os.path.exists(CAR_INFO_FILENAME):
     with open(CAR_INFO_FILENAME, "w") as json_file:
         json_file.write(json.dumps(json_base))
-
-# Initiate OBDHandler
 
 # Initialize parser
 parser = argparse.ArgumentParser()
@@ -51,13 +46,14 @@ if args.Wipe:
     with open(CAR_INFO_FILENAME, "w") as json_file:
         json_file.write(json.dumps(json_base))
     print("Calibration data wiped")
-# Valid sources
+
+# Valid real time data sources
 VALID_SOURCES = ["OBD", "AssettoCorsa", "AC", "ACC", "OBDII", "OBD2"]
 if args.Source in VALID_SOURCES:
     if args.Source in ["OBD", "OBDII", "OBD2"]:
         handler = OBDHandler()
 
-        # Values Calibration
+        # OBDII Calibration
         with open(CAR_INFO_FILENAME, "r+") as json_file:
             car_values = json.load(json_file)
             if car_values["idle"] < 0 or car_values["redline"] < 0 or car_values["pedal"] == [-1,-1]:
@@ -158,7 +154,7 @@ vocals_port = loop.get_streams_ports()["Vocals"]
 
 try:
     while True:
-        time.sleep(1/90) # The less this value, the more accurate and responsive the audio change will be.
+        time.sleep(1/90) # The smaller this value, the more accurate and responsive the audio change will be.
 
         # Get new values
         handler.refresh_values()
@@ -221,4 +217,3 @@ except KeyboardInterrupt:
     print("\nGoodbye!")
 
 loop.stop_streams()
-
