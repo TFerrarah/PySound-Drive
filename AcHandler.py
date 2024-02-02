@@ -66,8 +66,7 @@ class AcHandler():
     # Value to volume conversion formulas
 
     def speed_to_vol(self, raw_speed):
-        if raw_speed <= 40: r = 0.000940424*raw_speed**2-0.00357231*raw_speed -0.0102372 
-        else: r = 1
+        r =  -0.00104167*raw_speed**2+0.122917*raw_speed-2.25 if raw_speed <= 40 else 1
 
         if r < 0 : r = 0 
         elif r > 1 : r = 1
