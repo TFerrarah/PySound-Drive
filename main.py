@@ -39,8 +39,18 @@ if not os.path.exists(CAR_INFO_FILENAME):
 parser = argparse.ArgumentParser()
 # Adding source argument
 parser.add_argument("-s", "--Source", help = "[OBD, AC (AssettoCorsa, ACC, OBDII and OBD2 are also valid)] Input data Source (Assetto Corsa Competizione also works)", default = "OBD")
+# Wipe car_values
+parser.add_argument("-w", "--Wipe", help = "Wipe calibration data", action="store_true")
+
+
 # Read arguments from command line
 args = parser.parse_args()
+
+# Wipe car_values
+if args.Wipe:
+    with open(CAR_INFO_FILENAME, "w") as json_file:
+        json_file.write(json.dumps(json_base))
+    print("Calibration data wiped")
 # Valid sources
 VALID_SOURCES = ["OBD", "AssettoCorsa", "AC", "ACC", "OBDII", "OBD2"]
 if args.Source in VALID_SOURCES:
@@ -90,39 +100,52 @@ if args.Source in VALID_SOURCES:
             car_values = json.load(json_file)
             if car_values["idle"] < 0 or car_values["redline"] < 0:
                 input("No PySound-Drive calibration data was found. Press ENTER when you're ready for PySound-Drive calibration...")
-                # Calibrate idle rpm
-                while True:
-                    try:
-                        car_values["idle"] = int(input("Please enter your car's idle RPM [e.g. 950, 1000]: "))
-                        if 0 <= car_values["idle"] <= 15000:
-                            break
-                        else:
-                            print("Idle RPM must be between 0 - 15000")
-                    except ValueError:
-                        print("Input not recognized. Try again")
+                # Calibrate idle rpm in ac
 
+                print("Put your car in NEUTRAL and wait 3 seconds...")
+                time.sleep(3)
+                idle_values = []
+                for i in range(1,5):
+                    handler.refresh_values()
+                    print("["+str(i)+"] Reading Idle RPM information...")
+                    idle_values.append(handler.get_rpm())
+                    time.sleep(0.5)
+
+                car_values["idle"] = sum(idle_values) / len(idle_values)
+
+                print("Idle RPM registered!")
                 # Calibrate redline rpm
-                while True:
-                    try:
-                        car_values["redline"] = int(input("Please enter your car's redline RPM [e.g. 4500, 8000]: "))
-                        if 0 <= car_values["redline"] <= 15000:
-                            break
-                        else:
-                            print("Redline RPM must be between 0 - 15000")
-                    except ValueError:
-                        print("Input not recognized. Try again")
+                input("Leave your car in NEUTRAL and REV to FULL GAS press ENTER when you're ready...")
+                time.sleep(1)
+                redline = []
+                for i in range(1,5):
+                    handler.refresh_values()
+                    print("!KEEP PUSHING!")
+                    print("["+str(i)+"] Reading Redline RPM information...")
+                    redline.append(handler.get_rpm())
+                    time.sleep(0.5)
+                
+                car_values["redline"] = sum(redline) / len(redline)
+
 
                 # Write to file
                 json_file.seek(0)
                 json_file.write(json.dumps(car_values))
                 json_file.truncate()
+                print("Redline RPM registered!")
+
+                print("✅ Calibration complete ✅")
+
+
+    # Refresh values
+    handler.refresh_calibrations()
 
 else:
     print("Invalid source. Please use one of the following: "+str(VALID_SOURCES))
     exit()
 
 
-
+input("Press ENTER to start Vibe Drive...")
 loop = AudioStreams(audio_components) # ! THIS IS WHERE AUDIO STARTS PLAYING
 
 print(loop.get_streams_ports())
@@ -135,7 +158,7 @@ vocals_port = loop.get_streams_ports()["Vocals"]
 
 try:
     while True:
-        time.sleep(0.01) # The less this value, the more accurate and responsive the audio change will be.
+        time.sleep(1/90) # The less this value, the more accurate and responsive the audio change will be.
 
         # Get new values
         handler.refresh_values()
