@@ -153,6 +153,13 @@ class OBDHandler():
         print("✅ Calibration complete ✅")
 
         return [self.min_pedal, self.max_pedal]
+    
+    def refresh_calibrations(self):
+        # Read values from JSON file
+        with open("car_ranges.json", "r") as json_file:
+            car_values = json.load(json_file)
+            self.redline = car_values["redline"]
+            self.idle = car_values["idle"]
 
     def get_percentages(self):
         return {

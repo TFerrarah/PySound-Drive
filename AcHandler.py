@@ -21,6 +21,13 @@ class AcHandler():
             car_values = json.load(json_file)
             self.redline = car_values["redline"]
             self.idle = car_values["idle"]
+    
+    def refresh_calibrations(self):
+        # Read values from JSON file
+        with open("car_ranges.json", "r") as json_file:
+            car_values = json.load(json_file)
+            self.redline = car_values["redline"]
+            self.idle = car_values["idle"]
 
     def refresh_values(self): 
         sm = self.asm.read_shared_memory() # Read AC shared memory
