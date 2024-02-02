@@ -52,16 +52,23 @@
 </details>
 
 <!-- GETTING STARTED -->
-## Getting Started
-Make sure to have these programs installed:
+# Getting Started
+
+## Prerequisites
+
+To get Vibe Drive up and running you'll need:
+- A computer;
+- An OBD-II compatible car (All cars from 1996 onwards should be compatible) / Assetto Corsa / Assetto Corsa Competizione;
+- (Only for OBD-II) A working OBD-II adapter (e.g. Bluetooth ELM327 works just fine) and its drivers (when needed)
+- A song split in 4 different tracks (You can do so with the <a href="https://github.com/fabiogra/moseca">Moseca</a> free tool)
+
+Also make sure to have these programs installed:
 - Python 3
 - ffplay
 - zmqsend
 
-## Prerequisites
-
 <details>
-  <summary>Installing Python3, ffmpeg, ffmpeg-tools</summary>
+  <summary>If you don't have these programs installed...</summary>
   Vibe Drive requires these programs to be installed and working: **Python**, **ffplay**, **zmqsend**
 
   ### Installing Python
@@ -128,7 +135,12 @@ Make sure to have these programs installed:
    git clone https://github.com/TFerrarah/Vibe-Drive.git
    cd Vibe-Drive
    pip install -r requirements.txt
+   mkdir Audio
    ```
+
+  _An automatic solution is being developed to manage audio files, but for now follow these instructions:_ <br>
+  Split your song into 4 files: Bass, Vocals, Drums, Other and place those files in the newly created `Audio` folder. Most audio extensions should work as long as they are supported by your ffmpeg / ffplay installation
+  
 
 <!-- USAGE EXAMPLES -->
 ## Usage
