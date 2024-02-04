@@ -12,7 +12,12 @@ VERBOSE = True
 
 # Audio Stuff
 cwd = os.getcwd();
-separated_audio_dir = cwd+"/Audio/Separated/"
+
+# Create audio directory if not present
+if not os.path.exists(cwd+"/Audio"):
+    os.mkdir(cwd+"/Audio")
+
+separated_audio_dir = cwd+"/Audio/"
 AUDIO_EXT = [".mp3", ".m4a", ".flac", ".wav"] # You can add more audio extensions here, as long as they are supported in ffplay
 
 # List of absolute paths for the component of the song
