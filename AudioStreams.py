@@ -9,7 +9,7 @@ INITIAL_ZMQ_PORT = 5560
 STARTING_VOLUME = 0
 
 def create_audio_cmd(audio, port):
-    return "ffplay -ss 14 -hide_banner -loglevel error -nodisp -loop 0 -af \"lowpass@lpf="+str(STARTING_LPF)+",volume@vol="+str(STARTING_VOLUME)+",azmq=bind_address=tcp\\\\\\://127.0.0.1\\\\\\:"+str(port)+"\" "+audio
+    return "ffplay -hide_banner -loglevel error -nodisp -loop 0 -af \"lowpass@lpf="+str(STARTING_LPF)+",volume@vol="+str(STARTING_VOLUME)+",azmq=bind_address=tcp\\\\\\://127.0.0.1\\\\\\:"+str(port)+"\" "+audio
 
 class AudioStreams():
 
@@ -42,12 +42,12 @@ class AudioStreams():
     def change_lpf(self, frequency, port):
         # cmd_lpf = "echo lowpass@lpf frequency "+str(frequency)+" | zmqsend -b tcp://127.0.0.1:"+str(port)
         # subprocess.run(cmd_lpf, shell=True, stdout = subprocess.DEVNULL)
-        self.sockets[str(port)].send(b"lowpass@lpf frequency "+str(frequency))
+        self.sockets[str(port)].send_string("lowpass@lpf frequency "+str(frequency))
     
     def change_vol(self, volume ,port):
         # cmd_vol = "echo volume@vol volume "+str(volume)+" | zmqsend -b tcp://127.0.0.1:"+str(port)
         # subprocess.run(cmd_vol, shell=True, stdout = subprocess.DEVNULL)
-        self.sockets[str(port)].send(b"volume@vol volume "+str(volume))
+        self.sockets[str(port)].send_string("volume@vol volume "+str(volume))
 
     def stop_streams(self):
         for s in self.streams:
