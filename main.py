@@ -159,7 +159,7 @@ vocals_port = loop.get_streams_ports()["Vocals"]
 
 try:
     while True:
-        time.sleep(1/90) # The smaller this value, the more accurate and responsive the audio change will be.
+        time.sleep(1/30) # The smaller this value, the more accurate and responsive the audio change will be.
 
         # Get new values
         handler.refresh_values()

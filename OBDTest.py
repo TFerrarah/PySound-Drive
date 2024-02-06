@@ -15,7 +15,7 @@ socket.connect(ZMQ_IP)
 # # Close connection
 # socket.close()
 
-# Adjust volume every 3 seconds
+# Adjust volume and frequency 90 times per second (90Hz refresh rate)
 
 while True:
     time.sleep(1/90)
@@ -33,3 +33,6 @@ while True:
     # get server response
     message = socket.recv()
     print("Received reply: ", message)
+
+# Start multiple audio streams and set their volume and frequency
+    
