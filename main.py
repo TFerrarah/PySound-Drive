@@ -15,6 +15,9 @@ cwd = os.getcwd();
 # Create audio directory if not present
 if not os.path.exists(cwd+"/Audio"):
     os.mkdir(cwd+"/Audio")
+    # Print message and close program
+    print("Audio folder created! Please place the audio files in the Audio folder and restart the program.")
+    exit()
 
 separated_audio_dir = cwd+"/Audio/"
 AUDIO_EXT = [".mp3", ".m4a", ".flac", ".wav"] # You can add more audio extensions here, as long as they are supported in ffplay
