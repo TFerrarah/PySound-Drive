@@ -1,5 +1,6 @@
 import os
 import subprocess
+import zmq
 
 ## Audio stream
 
@@ -25,17 +26,28 @@ class AudioStreams():
             self.streams_ports[filename] = port
             port = port+1
 
+        # Start zmq sockets
+        self.context = zmq.Context()
+
+        self.sockets = {}
+        for p in self.streams_ports.values():
+            self.sockets[str(p)] = self.context.socket(zmq.REQ)
+            self.sockets[str(p)].connect("tcp://127.0.0.1:"+str(p))
+
+
     
     def get_streams_ports(self):
         return self.streams_ports
 
     def change_lpf(self, frequency, port):
-        cmd_lpf = "echo lowpass@lpf frequency "+str(frequency)+" | zmqsend -b tcp://127.0.0.1:"+str(port)
-        subprocess.run(cmd_lpf, shell=True, stdout = subprocess.DEVNULL)
+        # cmd_lpf = "echo lowpass@lpf frequency "+str(frequency)+" | zmqsend -b tcp://127.0.0.1:"+str(port)
+        # subprocess.run(cmd_lpf, shell=True, stdout = subprocess.DEVNULL)
+        self.sockets[str(port)].send(b"lowpass@lpf frequency "+str(frequency))
     
     def change_vol(self, volume ,port):
-        cmd_vol = "echo volume@vol volume "+str(volume)+" | zmqsend -b tcp://127.0.0.1:"+str(port)
-        subprocess.run(cmd_vol, shell=True, stdout = subprocess.DEVNULL)
+        # cmd_vol = "echo volume@vol volume "+str(volume)+" | zmqsend -b tcp://127.0.0.1:"+str(port)
+        # subprocess.run(cmd_vol, shell=True, stdout = subprocess.DEVNULL)
+        self.sockets[str(port)].send(b"volume@vol volume "+str(volume))
 
     def stop_streams(self):
         for s in self.streams:
