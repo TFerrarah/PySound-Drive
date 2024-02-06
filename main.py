@@ -2,7 +2,6 @@ import os
 import time
 import json
 import argparse
-from numpy import average
 from AudioStreams import AudioStreams
 from OBDHandler import OBDHandler
 from AcHandler import AcHandler
@@ -156,6 +155,10 @@ bass_port = loop.get_streams_ports()["Bass"]
 drums_port = loop.get_streams_ports()["Drums"]
 other_port = loop.get_streams_ports()["Other"]
 vocals_port = loop.get_streams_ports()["Vocals"]
+
+def average(lst, weights):
+    return sum([lst[i] * weights[i] for i in range(len(lst))]) / sum(weights)
+
 
 try:
     while True:
