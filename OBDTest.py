@@ -8,7 +8,7 @@ socket = context.socket(zmq.REQ)
 socket.connect(ZMQ_IP)
 
 # Send message to server
-socket.send(b"volume@vol volume 1")
+socket.send_string("volume@vol volume 0")
 
 # Close connection
 socket.close()
