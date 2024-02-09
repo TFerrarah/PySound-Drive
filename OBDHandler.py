@@ -13,21 +13,9 @@ class OBDHandler():
         ports = obd.scan_serial()      # return list of valid USB or RF ports
         print(ports)
         
-        # Choose OBDII port
-        while True:
-            try:
-                self.obd_port = int(input("Please choose your port [0-"+str(len(ports)-1)+"]"))
-                if 0 <= self.obd_port <= int(len(ports)):
-                    break
-                else:
-                    print("Port number is not valid. Please try again")
-            except ValueError:
-                print("Input not recognized. Try again")
+        # Connect to Bluetooth OBD2 adapter
+        # TODO: Read MAC Address from file
             
-
-        # ! Uncomment for emulator use only
-        # ports[self.obd_port] = "/dev/ttys010"
-
         # Create connection
         self.connection = obd.OBD(ports[self.obd_port], baudrate=115200, protocol="7", fast=False) # a
 
