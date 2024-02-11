@@ -1,6 +1,8 @@
 import obd
 import subprocess
 
+obd.logger.setLevel(obd.logging.DEBUG)
+
 # read ObdII mac from file
 with open("obd_mac.txt", "r") as file:
     OBD_MAC = file.read().strip()
