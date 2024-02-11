@@ -104,7 +104,6 @@ with open("obd_mac.txt", "r") as file:
 # Connect to OBDII
 p = subprocess.Popen("sudo rfcomm connect hci0 "+OBD_MAC, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-
 input("Press ENTER to start Vibe Drive...")
 loop = AudioStreams(audio_components) # ! THIS IS WHERE AUDIO STARTS PLAYING
 

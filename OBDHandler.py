@@ -14,7 +14,7 @@ class OBDHandler():
         print(ports)
                     
         # Create connection
-        self.connection = obd.OBD(ports[self.obd_port], baudrate=115200, protocol="7", fast=False) # a
+        self.connection = obd.OBD(ports[0], baudrate=115200, protocol="7", fast=False) # a
 
         # Reset values
         self.speed = 0
