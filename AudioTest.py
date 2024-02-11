@@ -30,7 +30,7 @@ import os
 def create_audio_cmd(audio, port):
     return "ffplay -ss 14 -hide_banner -loglevel error -nodisp -loop 0 -af \"lowpass@lpf="+str(20000)+",volume@vol="+str(0)+",azmq=bind_address=tcp\\\\\\://127.0.0.1\\\\\\:"+str(port)+"\" "+audio
 
-streams = []
+streams = "" # Run multiple ffplay with ; as separator
 streams_ports = {}
 # For each file in ./Audio run subprocess.Popen(create_audio_cmd(c, port), shell=True) where port is 5560 + i
 port = 5560
@@ -43,10 +43,16 @@ for audio in os.listdir("./Audio"):
         start = time.time()
         filename = os.path.splitext(os.path.basename(audio))[0]+".m4a"
         print(filename +" -> "+ str(port))
-        streams.append(subprocess.Popen(create_audio_cmd("./Audio/"+audio, port), shell=True))
+        # streams.append(subprocess.Popen(create_audio_cmd("./Audio/"+audio, port), shell=True))
+        streams += create_audio_cmd("./Audio/"+audio, port) + " | "
         streams_ports[filename] = port
         port = port+1
         print("Time: "+str(time.time()-start))
+
+streams=streams[:-3] # Remove last separator from streams
+print(streams)
+# Start all streams
+ffplay_process = subprocess.Popen(streams, shell=True)
 
 # Start zmq sockets and contexes for each port
 contexes = {}
@@ -60,22 +66,23 @@ for p in streams_ports.values():
 MULTI = True
 
 while MULTI:
-    time.sleep(1/90)
-    for p in streams_ports.values():
-        # Volume should follow a sinusoidal pattern from 0 to 1
-        vol = (math.sin(time.time())+1)/2
+    try:
+        time.sleep(1/90)
+        for p in streams_ports.values():
+            # Volume should follow a sinusoidal pattern from 0 to 1
+            vol = (math.sin(time.time())+1)/2
 
-        # frequency should follow a sinusoidal pattern from 200 to 20000
-        freq = 200 + 19800*(math.sin(time.time())+1)/2
+            # frequency should follow a sinusoidal pattern from 200 to 20000
+            freq = 200 + 19800*(math.sin(time.time())+1)/2
 
-        # send message to server
-        sockets[str(p)].send_string("volume@vol volume "+str(vol))
-        # receive message [MANDATORY]
-        sockets[str(p)].recv()
-        sockets[str(p)].send_string("lowpass@lpf frequency "+str(freq))
-        # receive message [MANDATORY]
-        sockets[str(p)].recv()
-
-# Stop all streams on exit
-for s in streams:
-    s.terminate()
+            # send message to server
+            sockets[str(p)].send_string("volume@vol volume "+str(vol))
+            # receive message [MANDATORY]
+            sockets[str(p)].recv()
+            sockets[str(p)].send_string("lowpass@lpf frequency "+str(freq))
+            # receive message [MANDATORY]
+            sockets[str(p)].recv()
+    except KeyboardInterrupt:
+        # Stop all streams on exit
+        ffplay_process.terminate()
+        break
