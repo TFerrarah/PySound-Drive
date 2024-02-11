@@ -4,6 +4,7 @@ import json
 import argparse
 from AudioStreams import AudioStreams
 from OBDHandler import OBDHandler
+import subprocess
 
 DEBUG = False
 VERBOSE = True
@@ -89,6 +90,20 @@ if args.Wipe:
     
     # Refresh values
     handler.refresh_calibrations()
+else:
+    # Initialize OBDII handler
+    handler = OBDHandler()
+
+
+# ! Raspberry Pi specific code
+    
+# read ObdII mac from file
+with open("obd_mac.txt", "r") as file:
+    OBD_MAC = file.read().strip()
+
+# Connect to OBDII
+p = subprocess.Popen("sudo rfcomm connect hci0 "+OBD_MAC, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
 
 input("Press ENTER to start Vibe Drive...")
 loop = AudioStreams(audio_components) # ! THIS IS WHERE AUDIO STARTS PLAYING
