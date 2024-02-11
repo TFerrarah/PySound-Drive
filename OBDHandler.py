@@ -12,10 +12,7 @@ class OBDHandler():
 
         ports = obd.scan_serial()      # return list of valid USB or RF ports
         print(ports)
-        
-        # Connect to Bluetooth OBD2 adapter
-        # TODO: Read MAC Address from file
-            
+                    
         # Create connection
         self.connection = obd.OBD(ports[self.obd_port], baudrate=115200, protocol="7", fast=False) # a
 
