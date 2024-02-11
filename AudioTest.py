@@ -34,13 +34,19 @@ streams = []
 streams_ports = {}
 # For each file in ./Audio run subprocess.Popen(create_audio_cmd(c, port), shell=True) where port is 5560 + i
 port = 5560
+
+# ! TESTING
+import time
+
 for audio in os.listdir("./Audio"):
     if audio.endswith(".m4a"):
+        start = time.time()
         filename = os.path.splitext(os.path.basename(audio))[0]+".m4a"
         print(filename +" -> "+ str(port))
         streams.append(subprocess.Popen(create_audio_cmd("./Audio/"+audio, port), shell=True))
         streams_ports[filename] = port
         port = port+1
+        print("Time: "+str(time.time()-start))
 
 # Start zmq sockets and contexes for each port
 contexes = {}
