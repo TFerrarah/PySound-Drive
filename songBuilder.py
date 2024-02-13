@@ -2,8 +2,7 @@ import json
 import subprocess
 import argparse
 import os
-
-VERBOSE = False
+import shutil
 
 # # Install yt-dlp if not already installed
 # cmd = """
@@ -82,6 +81,10 @@ for i, video in enumerate(playlist["entries"]):
     os.rename(f"./separated/{MODEL}/Trimmed/bass.wav", "./Bass.wav")
     os.rename(f"./separated/{MODEL}/Trimmed/other.wav", "./Other.wav")
     # Remove the separated directory
-    os.rmdir("./separated")
+    shutil.rmtree("./separated")
+    # Remove the trimmed audio file
+    os.remove("./Trimmed.mp3")
     # Return to root directory
     os.chdir("..")
+
+print("Songs built successfully and ready to be used.")
