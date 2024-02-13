@@ -19,14 +19,6 @@ if not os.path.exists(cwd+"/Audio"):
     print("Audio folder created! Please place the audio files in the Audio folder and restart the program.")
     exit()
 
-separated_audio_dir = cwd+"/Audio/"
-AUDIO_EXT = [".mp3", ".m4a", ".flac", ".wav"] # You can add more audio extensions here, as long as they are supported in ffplay
-
-# List of absolute paths for the component of the song
-# This is done to ensure future-proofing to enable variations of other audio channels
-# Only Bass, Drums, Vocals and "Other" channels will be used
-audio_components = [separated_audio_dir+file for file in os.listdir(separated_audio_dir) if file.endswith(tuple(AUDIO_EXT))]
-
 # Manage car's values file
 json_base = {"pedal" : [-1,-1],"redline" : -1,"idle" : -1}
 
@@ -147,6 +139,22 @@ else:
     print("Invalid source. Please use one of the following: "+str(VALID_SOURCES))
     exit()
 
+# Song selection
+# List all directory names in the Audio folder
+songs = [f.name for f in os.scandir(cwd+"/Audio") if f.is_dir()]
+print("Select a song by typing the number and pressing ENTER:")
+for i in range(len(songs)):
+    print("["+str(i)+"] "+songs[i])
+
+selected_song = songs[int(input("Song number: "))]
+
+separated_audio_dir = cwd+"/Audio/"+selected_song+"/"
+AUDIO_EXT = [".mp3", ".m4a", ".flac", ".wav"] # You can add more audio extensions here, as long as they are supported in ffplay
+
+# List of absolute paths for the component of the song
+# This is done to ensure future-proofing to enable variations of other audio channels
+# Only Bass, Drums, Vocals and "Other" channels will be used
+audio_components = [separated_audio_dir+file for file in os.listdir(separated_audio_dir) if file.endswith(tuple(AUDIO_EXT))]
 
 input("Press ENTER to start Vibe Drive...")
 loop = AudioStreams(audio_components) # ! THIS IS WHERE AUDIO STARTS PLAYING
