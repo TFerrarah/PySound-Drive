@@ -9,7 +9,7 @@ INITIAL_ZMQ_PORT = 5560
 STARTING_VOLUME = 0
 
 def create_audio_cmd(audio, port):
-    return "ffplay -hide_banner -loglevel error -nodisp -loop 0 -af \"lowpass@lpf="+str(STARTING_LPF)+",volume@vol="+str(STARTING_VOLUME)+",azmq=bind_address=tcp\\\\\\://127.0.0.1\\\\\\:"+str(port)+"\" "+audio
+    return "ffplay -hide_banner -loglevel error -nodisp -loop 0 -af \"lowpass@lpf="+str(STARTING_LPF)+",volume@vol="+str(STARTING_VOLUME)+",azmq=bind_address=tcp\\\\\\://127.0.0.1\\\\\\:"+str(port)+"\" \""+audio+"\""
 
 class AudioStreams():
 
@@ -27,9 +27,9 @@ class AudioStreams():
             self.streams_ports[filename] = port
             port = port+1
         
-        streams=streams[:-3] # Remove last separator from streams
+        self.streams=self.streams[:-3] # Remove last separator from streams
         # Start all streams
-        self.ffplay_process = subprocess.Popen(streams, shell=True)
+        self.ffplay_process = subprocess.Popen(self.streams, shell=True)
 
         # Start zmq sockets
         self.context = zmq.Context()
