@@ -1,6 +1,7 @@
 import json
 import subprocess
 import argparse
+import os
 
 VERBOSE = False
 
@@ -15,36 +16,43 @@ VERBOSE = False
 #     subprocess.run(cmd, shell=True)
 
 PLAYLIST_URL = "https://www.youtube.com/playlist?list=PL9FAVP824Gr-bZYQp8o31dKJSCVID2lAB"
-print("Getting playlist info...")
-# Get playlist description
-cmd = f"yt-dlp --skip-download -I0 --print playlist:description \"{PLAYLIST_URL}\""
-description = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode("utf-8")
+PLAYLIST_FILE = "./playlist.json"
 
-# Decode description to get JSON and write to file
-description = json.loads(description)
-with open("playlist.json", "w") as f:
-    json.dump(description, f, indent=4)
+# Initialize parser
+parser = argparse.ArgumentParser()
+# Wipe car_values
+parser.add_argument("-u", "--Update", help = "Update playlist file", action="store_true")
 
-# Check for differences between local playlist file and remote playlist
-# But only if the -u flag is passed
+args = parser.parse_args()
 
-args = argparse.ArgumentParser()
+# Get playlist information if file does not exist or update is explicitly requested
+if args.Update or not os.path.exists(PLAYLIST_FILE):
+    print("Updating playlist file...")
+    cmd = f"yt-dlp --skip-download -I0 --print playlist:description \"{PLAYLIST_URL}\""
+    description = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode("utf-8")
+    description = json.loads(description)
+    with open(PLAYLIST_FILE, "w") as f:
+        json.dump(description, f, indent=4)
+    print("Playlist file updated")
 
-if args.update:
-    print("Checking for differences between local and remote playlist...")
-    # Get playlist items
-    cmd = f"yt-dlp --skip-download -J \"{PLAYLIST_URL}\""
-    playlist = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode("utf-8")
-    playlist = json.loads(playlist)
+# For each video in playlist, download it and trim it to the timestamps specified in the playlist.json file
+with open(PLAYLIST_FILE, "r") as f:
+    playlist = json.load(f)
 
-    # Compare local and remote playlists
-    with open("playlist.json", "r") as f:
-        local_playlist = json.load(f)
+# Download using the -I X argument where X is a number from 1 to playlist length and save it to /Audio/[SONG_NAME]/Original.mp3
+# be sure to respect video index in playlist and index in playlist.json
+for i, video in enumerate(playlist["entries"]):
+    title = video["title"]
+    start = video["start"]
+    end = video["end"]
+    print(f"Downloading {title}...")
+    cmd = f"yt-dlp -x --audio-format mp3 -f 'bestaudio' --extract-audio --no-playlist --output \"./Audio/{title}/Original.%(ext)s\" -I {i+1} {PLAYLIST_URL}"
+    subprocess.run(cmd, shell=True)
 
-    # Check for differences
-    if playlist != local_playlist:
-        print("Playlist has changed. Updating local playlist...")
-        with open("playlist.json", "w") as f:
-            json.dump(playlist, f, indent=4)
-    else:
-        print("Playlist has not changed.")
+    # Trim the audio file to the specified timestamps
+    print(f"Trimming {title}...")
+    cmd = f"ffmpeg -i \"./Audio/{title}/Original.mp3\" -ss {start} -to {end} -c copy \"./Audio/{title}/Trimmed.mp3\""
+    subprocess.run(cmd, shell=True)
+
+    # Remove the original audio file
+    os.remove(f"./Audio/{title}/Original.mp3")
