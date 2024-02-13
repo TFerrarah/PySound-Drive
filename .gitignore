@@ -161,3 +161,4 @@ cython_debug/
 Audio/*
 .DS_Store
 car_ranges.json
+playlist.json
