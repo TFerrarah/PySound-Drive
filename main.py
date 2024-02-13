@@ -7,7 +7,7 @@ from OBDHandler import OBDHandler
 from AcHandler import AcHandler
 
 DEBUG = False
-VERBOSE = True
+VERBOSE = False
 
 # Audio Stuff
 cwd = os.getcwd();
@@ -173,7 +173,7 @@ def average(lst, weights):
 
 try:
     while True:
-        time.sleep(1/30) # The smaller this value, the more accurate and responsive the audio change will be.
+        time.sleep(1/90) # The smaller this value, the more accurate and responsive the audio change will be.
 
         # Get new values
         handler.refresh_values()
@@ -192,7 +192,7 @@ try:
         vocals_freq = frequencies["speed"]
 
         # Calculate volumes
-        if volumes["speed"] < 1: bass_vol = average([volumes["pedal"], volumes["rpm"]], weights=[.5, 1])
+        if volumes["speed"] < 1: bass_vol = average([volumes["pedal"], volumes["rpm"]], weights=[.5, 1]) + 0.3
         else: bass_vol = volumes["speed"]
 
         other_vol = average([volumes["pedal"], volumes["rpm"], volumes["speed"]], weights=[.4, 1, .2])
@@ -218,17 +218,17 @@ try:
             print("[CALC]   RAW PERCENTAGES ↓")
             print(handler.get_percentages())
 
-        # Set Volumes
-        loop.change_vol(bass_vol, bass_port)
-        loop.change_vol(drums_vol, drums_port)
-        loop.change_vol(other_vol, other_port)
-        loop.change_vol(vocals_vol, vocals_port)
-
         # Set LPF frequency
         loop.change_lpf(bass_freq, bass_port)
         loop.change_lpf(drums_freq, drums_port)
         loop.change_lpf(other_freq, other_port)
         loop.change_lpf(vocals_freq, vocals_port)
+
+        # Set Volumes
+        loop.change_vol(bass_vol, bass_port)
+        loop.change_vol(drums_vol, drums_port)
+        loop.change_vol(other_vol, other_port)
+        loop.change_vol(vocals_vol, vocals_port)
         
 
 except KeyboardInterrupt:
