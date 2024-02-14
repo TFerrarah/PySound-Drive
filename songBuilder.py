@@ -49,16 +49,16 @@ if not os.path.exists("./Audio"):
         start = video["start"]
         end = video["end"]
         print(f"Downloading {title}...")
-        cmd = f"yt-dlp -x --audio-format wav -f \"bestaudio\" --extract-audio --no-playlist --output \"./Audio/{title}/Original.%(ext)s\" -I {i+1} {PLAYLIST_URL}"
+        cmd = f"yt-dlp -f \"bestaudio\" --extract-audio --no-playlist --output \"./Audio/{title}/Original.%(ext)s\" -I {i+1} {PLAYLIST_URL}"
         subprocess.run(cmd, shell=True)
 
         # Trim the audio file to the specified timestamps
         print(f"Trimming {title}...")
-        cmd = f"ffmpeg -n -i \"./Audio/{title}/Original.wav\" -ss {start} -to {end} -c copy \"./Audio/{title}/Trimmed.wav\""
+        cmd = f"ffmpeg -n -i \"./Audio/{title}/Original.%(ext)s\" -ss {start} -to {end} -c copy \"./Audio/{title}/Trimmed.%(ext)s\""
         subprocess.run(cmd, shell=True)
 
         # Remove the original audio file
-        os.remove(f"./Audio/{title}/Original.wav")
+        os.remove(f"./Audio/{title}/Original.%(ext)s")
 
 
 # Use facebook's demucs to separate the audio into vocals, drums, bass, and other
@@ -74,7 +74,7 @@ for i, video in enumerate(playlist["entries"]):
     os.chdir(f"./{title}")
     # Separate audio
     MODEL = "htdemucs_ft"
-    demucs.separate.main(shlex.split(f'-n {MODEL} -j 2 "./Trimmed.wav"'))
+    demucs.separate.main(shlex.split(f'-n {MODEL} -j 2 "./Trimmed.%(ext)s"'))
     # Move audio files from /separated/htdemucs to /Audio/[SONG_NAME]
     os.rename(f"./separated/{MODEL}/Trimmed/vocals.wav", "./Vocals.wav")
     os.rename(f"./separated/{MODEL}/Trimmed/drums.wav", "./Drums.wav")
