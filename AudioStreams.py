@@ -9,7 +9,7 @@ INITIAL_ZMQ_PORT = 5560
 STARTING_VOLUME = 0
 
 def create_audio_cmd(audio, port):
-    return "ffplay -hide_banner -loglevel error -nodisp -loop 0 -af \"lowpass@lpf="+str(STARTING_LPF)+",volume@vol="+str(STARTING_VOLUME)+",azmq=bind_address=tcp\\\\\\://127.0.0.1\\\\\\:"+str(port)+"\" \""+audio+"\""
+    return "ffplay -ss 160 -loop 0 -hide_banner -loglevel error -nodisp -af \"lowpass@lpf="+str(STARTING_LPF)+",volume@vol="+str(STARTING_VOLUME)+",azmq=bind_address=tcp\\\\\\://127.0.0.1\\\\\\:"+str(port)+"\" \""+audio+"\""
 
 class AudioStreams():
 
