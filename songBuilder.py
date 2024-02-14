@@ -73,7 +73,7 @@ for i, video in enumerate(playlist["entries"]):
     # Change directory to song directory
     os.chdir(f"./{title}")
     # Separate audio
-    MODEL = "htdemucs_ft"
+    MODEL = "htdemucs"
     demucs.separate.main(shlex.split(f'-n {MODEL} -j 2 "./Trimmed.opus"'))
     # Move audio files from /separated/htdemucs to /Audio/[SONG_NAME]
     os.rename(f"./separated/{MODEL}/Trimmed/vocals.wav", "./Vocals.wav")
