@@ -54,11 +54,11 @@ if not os.path.exists("./Audio"):
 
         # Trim the audio file to the specified timestamps
         print(f"Trimming {title}...")
-        cmd = f"ffmpeg -n -i \"./Audio/{title}/Original.%(ext)s\" -ss {start} -to {end} -c copy \"./Audio/{title}/Trimmed.%(ext)s\""
+        cmd = f"ffmpeg -n -i \"./Audio/{title}/Original.opus\" -ss {start} -to {end} -c copy \"./Audio/{title}/Trimmed.opus\""
         subprocess.run(cmd, shell=True)
 
         # Remove the original audio file
-        os.remove(f"./Audio/{title}/Original.%(ext)s")
+        os.remove(f"./Audio/{title}/Original.opus")
 
 
 # Use facebook's demucs to separate the audio into vocals, drums, bass, and other
@@ -74,7 +74,7 @@ for i, video in enumerate(playlist["entries"]):
     os.chdir(f"./{title}")
     # Separate audio
     MODEL = "htdemucs_ft"
-    demucs.separate.main(shlex.split(f'-n {MODEL} -j 2 "./Trimmed.%(ext)s"'))
+    demucs.separate.main(shlex.split(f'-n {MODEL} -j 2 "./Trimmed.opus"'))
     # Move audio files from /separated/htdemucs to /Audio/[SONG_NAME]
     os.rename(f"./separated/{MODEL}/Trimmed/vocals.wav", "./Vocals.wav")
     os.rename(f"./separated/{MODEL}/Trimmed/drums.wav", "./Drums.wav")
