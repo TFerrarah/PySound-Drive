@@ -38,7 +38,7 @@ if args.Update or not os.path.exists(PLAYLIST_FILE):
 with open(PLAYLIST_FILE, "r") as f:
     playlist = json.load(f)
 
-# Download using the -I X argument where X is a number from 1 to playlist length and save it to /Audio/[SONG_NAME]/Original.mp3
+# Download using the -I X argument where X is a number from 1 to playlist length and save it to /Audio/[SONG_NAME]/Original.wav
 # be sure to respect video index in playlist and index in playlist.json
 # If audio folder is empty, create it and do the for loop
 if not os.path.exists("./Audio"):
@@ -49,16 +49,16 @@ if not os.path.exists("./Audio"):
         start = video["start"]
         end = video["end"]
         print(f"Downloading {title}...")
-        cmd = f"yt-dlp -x --audio-format mp3 -f \"bestaudio\" --extract-audio --no-playlist --output \"./Audio/{title}/Original.%(ext)s\" -I {i+1} {PLAYLIST_URL}"
+        cmd = f"yt-dlp -x --audio-format wav -f \"bestaudio\" --extract-audio --no-playlist --output \"./Audio/{title}/Original.%(ext)s\" -I {i+1} {PLAYLIST_URL}"
         subprocess.run(cmd, shell=True)
 
         # Trim the audio file to the specified timestamps
         print(f"Trimming {title}...")
-        cmd = f"ffmpeg -n -i \"./Audio/{title}/Original.mp3\" -ss {start} -to {end} -c copy \"./Audio/{title}/Trimmed.mp3\""
+        cmd = f"ffmpeg -n -i \"./Audio/{title}/Original.wav\" -ss {start} -to {end} -c copy \"./Audio/{title}/Trimmed.wav\""
         subprocess.run(cmd, shell=True)
 
         # Remove the original audio file
-        os.remove(f"./Audio/{title}/Original.mp3")
+        os.remove(f"./Audio/{title}/Original.wav")
 
 
 # Use facebook's demucs to separate the audio into vocals, drums, bass, and other
@@ -74,7 +74,7 @@ for i, video in enumerate(playlist["entries"]):
     os.chdir(f"./{title}")
     # Separate audio
     MODEL = "htdemucs_ft"
-    demucs.separate.main(shlex.split(f'-n {MODEL} -j 2 "./Trimmed.mp3"'))
+    demucs.separate.main(shlex.split(f'-n {MODEL} -j 2 "./Trimmed.wav"'))
     # Move audio files from /separated/htdemucs to /Audio/[SONG_NAME]
     os.rename(f"./separated/{MODEL}/Trimmed/vocals.wav", "./Vocals.wav")
     os.rename(f"./separated/{MODEL}/Trimmed/drums.wav", "./Drums.wav")
@@ -83,7 +83,7 @@ for i, video in enumerate(playlist["entries"]):
     # Remove the separated directory
     shutil.rmtree("./separated")
     # Remove the trimmed audio file
-    os.remove("./Trimmed.mp3")
+    os.remove("./Trimmed.wav")
     # Return to root directory
     os.chdir("..")
 
