@@ -9,7 +9,7 @@ INITIAL_ZMQ_PORT = 5560
 STARTING_VOLUME = 0
 
 def create_audio_cmd(audio, port):
-    return "ffplay -ss 160 -loop 0 -hide_banner -loglevel error -nodisp -af \"lowpass@lpf="+str(STARTING_LPF)+",volume@vol="+str(STARTING_VOLUME)+",azmq=bind_address=tcp\\\\\\://127.0.0.1\\\\\\:"+str(port)+"\" \""+audio+"\""
+    return "ffplay -loop 0 -hide_banner -loglevel error -nodisp -af \"lowpass@lpf="+str(STARTING_LPF)+",volume@vol="+str(STARTING_VOLUME)+",azmq=bind_address=tcp\\\\\\://127.0.0.1\\\\\\:"+str(port)+"\" \""+audio+"\""
 
 class AudioStreams():
 
@@ -62,7 +62,7 @@ class AudioStreams():
             socket.send_string("lowpass@lpf frequency "+str(frequency))
             socket.recv()
         except Exception as e:
-            print("[LPF - "+str(port)+" ] Delay on frequency change detected: "+str(e))
+            print("[LPF - "+str(port)+"] Delay on frequency change detected: "+str(e))
         finally:
             socket.close()
     
@@ -75,7 +75,7 @@ class AudioStreams():
             socket.send_string("volume@vol volume "+str(volume))
             socket.recv()
         except Exception as e:
-            print("[VOL - "+str(port)+" ] Delay on volume change response detected: "+str(e))
+            print("[VOL - "+str(port)+"] Delay on volume change response detected: "+str(e))
         finally:
             socket.close()
 
