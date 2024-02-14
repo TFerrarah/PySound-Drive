@@ -83,7 +83,7 @@ for i, video in enumerate(playlist["entries"]):
     # Remove the separated directory
     shutil.rmtree("./separated")
     # Remove the trimmed audio file
-    os.remove("./Trimmed.wav")
+    os.remove("./Trimmed.opus")
     # Return to root directory
     os.chdir("..")
 
