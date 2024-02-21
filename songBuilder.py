@@ -45,11 +45,11 @@ if not os.path.exists("./Audio"):
     os.mkdir("./Audio")
 
     for i, video in enumerate(playlist["entries"]):
-        title = video["title"]
+        title = video["title"].replace(" ","_")
         start = video["start"]
         end = video["end"]
         print(f"Downloading {title}...")
-        cmd = f"yt-dlp -f \"bestaudio\" --extract-audio --no-playlist --output \"./Audio/{title.strip()}/Original.%(ext)s\" -I {i+1} {PLAYLIST_URL}"
+        cmd = f"yt-dlp -f \"bestaudio\" --extract-audio --no-playlist --output \"./Audio/{title}/Original.%(ext)s\" -I {i+1} {PLAYLIST_URL}"
         subprocess.run(cmd, shell=True)
 
         # Trim the audio file to the specified timestamps
