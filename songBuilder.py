@@ -68,7 +68,7 @@ import shlex
 # Separate audio and save to /Audio/[SONG_NAME]
 os.chdir("./Audio")
 for i, video in enumerate(playlist["entries"]):
-    title = video["title"]
+    title = video["title"].replace(" ","_")
     print(f"Separating {title}...")
     # Change directory to song directory
     os.chdir(f"./{title}")
