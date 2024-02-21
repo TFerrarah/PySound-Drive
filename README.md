@@ -65,11 +65,11 @@ To get Vibe Drive up and running you'll need:
 Also make sure to have these programs installed:
 - Python 3
 - ffplay
-- zmqsend
 
 <details>
   <summary>If you don't have these programs installed...</summary>
-  Vibe Drive requires these programs to be installed and working: **Python**, **ffplay**, **zmqsend**
+  
+  Vibe Drive requires these programs to be installed and working: **Python**, **ffplay**
 
   ### Installing Python
   **Windows**
@@ -111,22 +111,6 @@ Also make sure to have these programs installed:
   ```
   sudo apt-get install ffmpeg
   ```
-  
-  ### Installing zmqsend
-  **Windows**
-  <a href="https://www.gyan.dev/ffmpeg/builds/#tools">Download ffmpeg-tools from gyan.dev</a> and add the `bin` folder to your PATH.
-  
-  **MacOS**
-  ```
-  brew install zmqsend
-  ```
-  
-  On macOS you can install only zmqsend, which is the only ffmpeg-tool needed
-  
-  **Ubuntu/Debian**
-  ```
-  sudo apt-get install libzmq3-dev
-  ```
 </details>
 
 ## Installation
@@ -138,9 +122,14 @@ Also make sure to have these programs installed:
    mkdir Audio
    ```
 
-  _An automatic solution is being developed to manage audio files, but for now follow these instructions:_ <br>
-  Split your song into 4 files: Bass, Vocals, Drums, Other and place those files in the newly created `Audio` folder. Most audio extensions should work as long as they are supported by your ffmpeg / ffplay installation
-  
+ <a href="https://colab.research.google.com/drive/1uYASgdV317NyswVvl2SpMvohozKDtuYy?usp=sharing">
+    <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="songBuilder.py">
+ </a>
+You then need to run this google colab to generate the split songs. Only some songs are ready to be split.
+
+ - All songs combines should be around 1Gb size, however you can only get the ones you like.<br>
+ **DISCLAIMER: The code is made for education purposes only. Only get/use songs by legal means.**
+ - Once you get a hold of the split song(s) you can place its folder right into the Audio folder in the root of the project.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
@@ -201,7 +190,8 @@ Project Link: [https://github.com/TFerrarah/Vibe-Drive](https://github.com/TFerr
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* Music Splitting done by Moseca: https://github.com/fabiogra/moseca
+* Music Splitting previously done by Moseca: https://github.com/fabiogra/moseca
+* Music Splitting actually done by Facebook's demucs tool: https://github.com/facebookresearch/demucs
 * Inspired from: https://github.com/lesageethan/carmony
 * Math formulas: https://www.dcode.fr/function-equation-finder
 * This YouTube Video: [https://www.youtube.com/watch?v=nIp1GEzF4EY](https://www.youtube.com/watch?v=nIp1GEzF4EY)
