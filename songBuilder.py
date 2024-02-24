@@ -45,7 +45,7 @@ if not os.path.exists("./Audio"):
     os.mkdir("./Audio")
 
     for i, video in enumerate(playlist["entries"]):
-        title = video["title"].replace(" ","_")
+        title = str(i) + "_" + video["title"].replace(" ","_")
         start = video["start"]
         end = video["end"]
         print(f"Downloading {title}...")
@@ -68,7 +68,7 @@ import shlex
 # Separate audio and save to /Audio/[SONG_NAME]
 os.chdir("./Audio")
 for i, video in enumerate(playlist["entries"]):
-    title = video["title"].replace(" ","_")
+    title = str(i) + "_" + video["title"].replace(" ","_")
     print(f"Separating {title}...")
     # Change directory to song directory
     os.chdir(f"./{title}")
