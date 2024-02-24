@@ -46,6 +46,7 @@ if not os.path.exists("./Audio"):
 
     for i, video in enumerate(playlist["entries"]):
         title = str(i) + "_" + video["title"].replace(" ","_")
+        print(f"Downloading {title}")
         start = video["start"]
         end = video["end"]
         print(f"Downloading {title}...")
